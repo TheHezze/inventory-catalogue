@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             items = parseCSV(csvData);
             if (items.length > 0) {
                 headers = items[0]; // Assuming the main CSV has headers
-                initializeIndices(['SKU', 'SKUVAR', 'SKUName', 'QuantityLimit', 'Quantity', 'Category', 'SubCategory', 'Thumbnails']);
+                initializeIndices(['Thumbnails', 'SKUName', 'QuantityLimit', 'Quantity', 'Category', 'SubCategory', 'SKU', 'SKUVAR', 'Description']);
                 initializeGallery();
             } else {
                 console.error('No data found in the CSV.');
@@ -74,27 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const galleryContainer = document.getElementById('galleryContainer');
 
         // Create search input
-const searchInput = document.createElement('input');
-searchInput.type = 'text';
-searchInput.classList.add('search-input'); // Apply the class
-searchInput.placeholder = 'Search...';
-galleryContainer.prepend(searchInput);
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.classList.add('search-input'); // Apply the class
+        searchInput.placeholder = 'Search...';
+        galleryContainer.prepend(searchInput);
 
-let searchTimeout; // Variable to hold the timeout
+        let searchTimeout; // Variable to hold the timeout
 
-searchInput.addEventListener('input', () => {
-    displayGallery(searchInput.value);
-    
-    // Clear the previous timeout, if any
-    clearTimeout(searchTimeout);
-    
-    // Set a new timeout to clear the input after 1500 milliseconds
-    searchTimeout = setTimeout(() => {
-        searchInput.value = ''; // Clear the input
-    }, 1500);
-});
-
-        
+        searchInput.addEventListener('input', () => {
+            displayGallery(searchInput.value);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchInput.value = ''; // Clear the input
+            }, 1500);
+        });
 
         const categorySelect = createDropdown('categorySelect', categories);
         const subcategorySelect = createDropdown('subcategorySelect', new Set());
@@ -105,10 +99,6 @@ searchInput.addEventListener('input', () => {
         });
 
         subcategorySelect.addEventListener('change', () => {
-            displayGallery(searchInput.value);
-        });
-
-        searchInput.addEventListener('input', () => {
             displayGallery(searchInput.value);
         });
 
@@ -171,6 +161,7 @@ searchInput.addEventListener('input', () => {
             const sku = item[indices['SKU']] || '';
             const quantityLimit = (item[indices['QuantityLimit']] || '').trim().toLowerCase() === 'true';
             const quantity = parseInt(item[indices['Quantity']] || '0') || 0;
+            const description = item[indices['Description']] || ''; // Get the description
             const categoryMatch = selectedCategory === 'All' || item[indices['Category']] === selectedCategory;
             const subcategoryMatch = selectedSubcategory === 'All' || item[indices['SubCategory']] === selectedSubcategory;
             const searchMatch = skuName.toLowerCase().includes(searchTerm.toLowerCase()) || sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -188,7 +179,8 @@ searchInput.addEventListener('input', () => {
                         imageUrl,
                         quantityLimit,
                         quantity,
-                        sku
+                        sku,
+                        description // Include description
                     });
                 } else {
                     skuGroups.get(key).count++;
@@ -196,8 +188,8 @@ searchInput.addEventListener('input', () => {
             }
         });
 
-        skuGroups.forEach(({ count, skuName, imageUrl, sku, quantityLimit, quantity }) => {
-            const div = createCard(skuName, count, imageUrl, sku, quantityLimit, quantity);
+        skuGroups.forEach(({ count, skuName, imageUrl, sku, quantityLimit, quantity, description }) => {
+            const div = createCard(skuName, count, imageUrl, sku, quantityLimit, quantity, description);
             gallery.appendChild(div);
             itemCount++;
         });
@@ -205,18 +197,29 @@ searchInput.addEventListener('input', () => {
         document.getElementById('countValue').textContent = itemCount; 
     }
 
-    function createCard(skuName, skuCount, imageUrl, sku, quantityLimit, quantity) {
+    function createCard(skuName, skuCount, imageUrl, sku, quantityLimit, quantity, description) {
         const div = document.createElement('div');
         div.classList.add('card');
 
         div.addEventListener('click', () => {
             const modalImg = document.getElementById("img01");
             const captionText = document.getElementById("caption");
+            const descriptionText = document.createElement('div'); // Create a new element for the description
 
-            modal.style.display = "block"; 
+            // Clear previous modal content
             modalImg.src = imageUrl;
             captionText.innerHTML = skuName;
+            descriptionText.innerHTML = description; // Set the description in the modal
 
+            // Clear any previous description
+            const existingDescription = modal.querySelector('.description');
+            if (existingDescription) {
+                existingDescription.remove();
+            }
+            descriptionText.className = 'description'; // Add a class for styling
+            modal.querySelector('.modal-content').appendChild(descriptionText); // Append the description
+
+            modal.style.display = "block"; 
             document.body.classList.add('modal-open');
         });
 

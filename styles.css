@@ -206,7 +206,7 @@ label {
     border-radius: 15px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
     max-width: 90%; 
-    height: 35vh; 
+    height: 50vh; 
     overflow: auto; 
     padding: 20px; 
     display: flex; 
@@ -282,4 +282,10 @@ label {
     font-family: "Inconsolata", "Arial", sans-serif; 
     color: #333; 
     margin: 10px 0; 
+}
+
+#description {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #555;
 }
