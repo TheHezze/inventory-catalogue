@@ -1,0 +1,285 @@
+/* General Styles */
+html {
+    height: 100%;
+    font-family: "Inconsolata", "Arial", sans-serif;
+    text-align: center;
+    background: #EDEDED;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.container, 
+.logo-img-title-container, 
+.input-details, 
+.checkbox-group label, 
+.logo-container, 
+button {
+    display: inherit;
+    justify-content: center;
+    border-radius: 5px;
+    width: fit-content;
+}
+
+.container {
+    max-height: calc(100% - 50px);
+}
+
+.logo-img-title-container, 
+.logo-container {
+    flex-direction: row;
+}
+
+/* Logo Styles */
+#logo1, 
+#logo2 { /* Changed from .logo1, .logo2 to #logo1, #logo2 */
+    flex: 2;
+    max-width: 100%;
+    max-height: 100px;
+    background-color: rgba(255, 255, 255, 0.60);
+    padding: 1px;
+    border-radius: 15px;
+    margin: 10px;
+    object-fit: contain;
+}
+
+/* Input and Checkbox Styles */
+.input-details, 
+.checkbox-group label {
+    flex-direction: column;
+}
+
+.checkbox-group input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label {
+    background-color: #009688;
+    color: #ffffff;
+    border-color: #007bff;
+}
+
+input[type=text], 
+input[type=datetime-local], 
+input[type=number] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+    outline: none;
+    text-align: center;
+}
+
+input[type=text]:focus, 
+input[type=datetime-local]:focus, 
+input[type=number]:focus {
+    border: 5px solid #555;
+}
+
+label {
+    display: block;
+    margin-top: 20px;
+}
+
+/* Gallery Styles */
+#csvGallery, 
+.csvGallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 
+                0 6px 20px rgba(0, 0, 0, 0.19);
+    margin: 10px; 
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 160px; 
+    height: 320px; 
+    position: relative;
+    overflow: hidden; 
+    background-color: #ffffff; 
+}
+
+.card img {
+    width: 100%; 
+    height: 150px; 
+    object-fit: contain; 
+    border-radius: 15px 15px 0 0; 
+}
+
+.card > div {
+    padding: 10px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    height: calc(100% - 150px); 
+    text-align: center;
+    flex-grow: 1; 
+}
+
+.card > div > .title {
+    font-size: 1em; 
+    font-weight: bold; 
+    margin: 10px 0; 
+}
+
+.card > div > .available-count {
+    font-size: 0.9em; 
+    color: #666; 
+    margin-top: auto; 
+}
+
+.card > div > .sku,
+.card > div > .id {
+    position: absolute; 
+    font-size: 0.7em; 
+    color: #666; 
+}
+
+.card > div > .sku {
+    bottom: 10px; 
+    right: 10px; 
+    text-align: right; 
+}
+
+.card > div > .id {
+    bottom: 10px; 
+    left: 10px; 
+    text-align: left; 
+}
+
+#galleryContainer {
+    position: relative;
+    text-align: left;
+}
+
+/* Search and Count Styles */
+#categorySelect, 
+#subcategorySelect {
+    position: relative;
+    z-index: 1;
+    font-size: larger;
+    width: 100%;
+    max-width: 375px;
+    min-height: 15px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#itemCount {
+    font-size: 1.1em;
+    margin: 10px 0;
+    color: #333; 
+    text-align: left; 
+    width: 100%; 
+    padding-left: 10px; 
+}
+
+#searchAndFilterContainer {
+    margin: 15px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;    
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.8); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.9); 
+    border-radius: 15px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    max-width: 90%; 
+    height: 35vh; 
+    overflow: auto; 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    text-align: center; 
+    margin: auto; 
+    margin-top: 10%;
+}
+
+.modal-content img {
+    max-height: 90%; 
+    max-width: 100%;
+    width: auto;
+    height: auto; 
+    display: block; 
+    margin: auto; 
+    border-radius: 15px; 
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #009688; 
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 12px; 
+}
+
+::-webkit-scrollbar-track {
+    background: #EDEDED; 
+    border-radius: 10px; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: #009688; 
+    border-radius: 10px; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #007b5f; 
+}
+
+* {
+    scrollbar-width: thin; 
+    scrollbar-color: #009688 #EDEDED; 
+}
+
+/* Additional Styles */
+.selected {
+    background-color: lightgreen;
+}
+
+.thumbnail {
+    width: 100%;
+    height: auto; 
+    max-height: 400px;
+    border-radius: 15px;
+}
+
+.modal-open .card {
+    opacity: 0.3; 
+}
+
+.modal-content p, 
+.modal-content h2, 
+.modal-content h3 {
+    font-family: "Inconsolata", "Arial", sans-serif; 
+    color: #333; 
+    margin: 10px 0; 
+}
