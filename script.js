@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let headers, indices = {};
 
     // Fetch the configuration CSV
-    fetch('')
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTrVrdiDeVrvNw6EZCdWXVG-ldJVDkvGJaRdH7mry14m-HXpr3GXNTWH4F8zWV50o79dVIpeYy4wkq3/pub?output=csv')
         .then(response => response.text())
         .then(configCsvData => {
             const configItems = parseCSV(configCsvData);
