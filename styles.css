@@ -373,7 +373,7 @@ label {
     top: 220px;
     right: 20px;
     width: 550px;
-    max-height: 400px;
+    max-height: 700px;
     background-color: var(--light-grey);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
