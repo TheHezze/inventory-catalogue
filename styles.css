@@ -473,5 +473,5 @@ label {
     color: white; /* Selected button text color */
 }
 #editButton {
-    display: none; /* Hide the edit button */
+    display: /* Hide the edit button */
 }
