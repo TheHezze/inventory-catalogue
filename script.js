@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let items = [];
     let headers, indices = {};
     let cart = {};
+    let isEditing = false; // New variable to track edit state
 
     // Fetch CSV configuration and data
     fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTrVrdiDeVrvNw6EZCdWXVG-ldJVDkvGJaRdH7mry14m-HXpr3GXNTWH4F8zWV50o79dVIpeYy4wkq3/pub?output=csv')
@@ -67,26 +68,88 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchInput = createSearchInput();
         galleryContainer.prepend(searchInput);
 
-        const categorySelect = createDropdown('categorySelect', categories);
+        const categoryButtons = createCategoryButtons(categories);
+        galleryContainer.appendChild(categoryButtons);
+
         const subcategorySelect = createDropdown('subcategorySelect', new Set());
-
-        categorySelect.addEventListener('change', () => {
-            filterSubcategories(subcategorySelect, categorySelect.value);
-            displayGallery(searchInput.value);
-        });
-
         subcategorySelect.addEventListener('change', () => {
             displayGallery(searchInput.value);
         });
 
-        galleryContainer.appendChild(createLabel('Category:', 'categorySelect'));
-        galleryContainer.appendChild(categorySelect);
-        galleryContainer.appendChild(createLabel('SubCategory:', 'subcategorySelect'));
+        galleryContainer.appendChild(createLabel('Tags:', 'subcategorySelect'));
         galleryContainer.appendChild(subcategorySelect);
-        galleryContainer.appendChild(createResetButton(categorySelect, subcategorySelect));
+        galleryContainer.appendChild(createResetButton(subcategorySelect));
+        galleryContainer.appendChild(createEditButton());
 
-        filterSubcategories(subcategorySelect, categorySelect.value);
+        filterSubcategories(subcategorySelect, 'All');
         displayGallery('');
+    }
+
+    function createCategoryButtons(categories) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('category-buttons');
+
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.textContent = category;
+            button.classList.add('category-button');
+            button.addEventListener('click', () => {
+                button.classList.toggle('selected');
+                displayGallery(document.querySelector('.search-input').value);
+            });
+            buttonContainer.appendChild(button);
+        });
+
+        return buttonContainer;
+    }
+
+    function createEditButton() {
+        const editDiv = document.createElement('div');
+        editDiv.style.display = 'inline-block';
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.id = 'editButton';
+
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save';
+        saveButton.id = 'saveButton';
+        saveButton.style.display = 'none';
+
+        editButton.addEventListener('click', () => {
+            isEditing = !isEditing; // Toggle editing state
+            editButton.textContent = isEditing ? 'Cancel' : 'Edit';
+            saveButton.style.display = isEditing ? 'inline-block' : 'none';
+            toggleQuantityControls(isEditing);
+        });
+
+        saveButton.addEventListener('click', () => {
+            if (isEditing) {
+                // Save quantities logic
+                items.forEach(item => {
+                    const sku = item[indices['SKU']];
+                    const quantityDisplay = document.querySelector(`.card .sku:contains(${sku}) + .quantity`);
+                    const newQuantity = parseInt(quantityDisplay.textContent, 10);
+                    updateCart(sku, newQuantity); // Save the quantities to the cart
+                });
+            }
+        });
+
+        editDiv.appendChild(editButton);
+        editDiv.appendChild(saveButton);
+        return editDiv;
+    }
+
+    function toggleQuantityControls(show) {
+        const quantityControls = document.querySelectorAll('.quantity-controls');
+        const quantityDisplays = document.querySelectorAll('.quantity');
+
+        quantityControls.forEach(control => {
+            control.style.display = show ? 'block' : 'none';
+        });
+        quantityDisplays.forEach(display => {
+            display.style.display = show ? 'inline' : 'none';
+        });
     }
 
     function createSearchInput() {
@@ -134,7 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayGallery(searchTerm = '') {
-        const selectedCategory = document.getElementById('categorySelect').value;
+        const selectedCategoryButtons = Array.from(document.querySelectorAll('.category-button.selected'));
+        const selectedCategories = selectedCategoryButtons.map(button => button.textContent);
         const selectedSubcategory = document.getElementById('subcategorySelect').value;
         const gallery = document.getElementById('csvGallery');
         gallery.innerHTML = '';
@@ -151,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const quantityLimit = (item[indices['QuantityLimit']] || '').trim().toLowerCase() === 'true';
             const availableQuantity = parseInt(item[indices['Quantity']] || '0') || 0;
 
-            const categoryMatch = selectedCategory === 'All' || item[indices['Category']] === selectedCategory;
+            const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(item[indices['Category']]);
             const subcategoryMatch = selectedSubcategory === 'All' || item[indices['SubCategory']] === selectedSubcategory;
             const searchMatch = skuName.toLowerCase().includes(searchTerm.toLowerCase()) || sku.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -176,8 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('countValue').textContent = itemCount;
-
-        // Sync the quantities with the cart after displaying the gallery
         syncQuantityDisplays();
     }
 
@@ -188,11 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv = createContentDiv(skuName, skuCount, imageUrl, sku);
         div.appendChild(contentDiv);
 
-        const infoButton = createInfoButton(skuName, imageUrl);
+        const infoButton = createInfoButton(imageUrl, skuName);
         contentDiv.insertBefore(infoButton, contentDiv.querySelector('.title'));
 
         const quantityControls = createQuantityControls(0, availableQuantity, sku);
         div.appendChild(quantityControls);
+        quantityControls.style.display = 'none';
 
         return div;
     }
@@ -208,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return contentDiv;
     }
 
-    function createInfoButton(skuName, imageUrl) {
+    function createInfoButton(imageUrl, skuName) {
         const button = document.createElement('button');
         button.innerHTML = '<i class="fas fa-info-circle"></i>';
         button.className = 'info-button';
@@ -231,11 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function createQuantityControls(initialQuantity, availableCount, sku) {
         const controlsDiv = document.createElement('div');
         controlsDiv.classList.add('quantity-controls');
-    
+
         const decrementButton = createQuantityButton('-', initialQuantity === 0, () => updateQuantity(-1));
         const quantityDisplay = createQuantityDisplay(initialQuantity);
         const incrementButton = createQuantityButton('+', initialQuantity >= availableCount, () => updateQuantity(1));
-    
+
         controlsDiv.append(incrementButton, quantityDisplay, decrementButton);
         return controlsDiv;
 
@@ -266,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     function createLabel(text, forId) {
         const label = document.createElement('label');
         label.textContent = text;
@@ -281,22 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return option;
     }
 
-    function createResetButton(categorySelect, subcategorySelect) {
+    function createResetButton(subcategorySelect) {
         const resetButton = document.createElement('button');
         resetButton.textContent = 'Reset Filters';
         resetButton.addEventListener('click', () => {
-            categorySelect.value = 'All';
+            document.querySelectorAll('.category-button.selected').forEach(button => {
+                button.classList.remove('selected');
+            });
             subcategorySelect.value = 'All';
-            displayGallery(document.querySelector('.search-input').value); // Use current search input
-            syncQuantityDisplays(); // Ensure quantities are synced after resetting
+            displayGallery(document.querySelector('.search-input').value);
+            syncQuantityDisplays();
         });
         return resetButton;
     }
-    
+
     // Cart functionality
     const cartButton = document.getElementById('cartButton');
     const cartContainer = document.getElementById('floatingCart');
-    cartContainer.style.display = 'none'; // Initially hide the cart
+    cartContainer.style.display = 'none';
 
     cartButton.addEventListener('click', () => {
         cartContainer.style.display = cartContainer.style.display === 'none' ? 'block' : 'none';
@@ -321,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCartDisplay() {
         const cartItemsContainer = document.getElementById('cartItemsContainer');
         cartItemsContainer.innerHTML = '';
-    
+
         for (const [sku, quantity] of Object.entries(cart)) {
             const item = items.find(item => item[indices['SKU']] === sku);
             if (!item) continue; // Ensure item exists
@@ -330,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageUrl = item[indices['Thumbnails']] || 'default-image-url.jpg';
             const cost = item[indices['Cost']];
             const id = item[indices['SKUVAR']] || 'N/A'; // Adjust if SKUVAR represents ID
-    
+
             // Create a line item element for each item
             const itemDiv = document.createElement('div');
             itemDiv.className = 'cart-item';
@@ -352,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateCartCount();
     }
-    
+
     function createCartQuantityControls(sku, currentQuantity, availableCount) {
         const controlsDiv = document.createElement('div');
         controlsDiv.classList.add('quantity-controls');
@@ -395,11 +460,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCartCount() {
         const totalItems = Object.values(cart).reduce((acc, curr) => acc + curr, 0);
         document.getElementById('cartCount').textContent = `Total items: ${totalItems}`;
-    
-        // Update cart button styling
         cartButton.classList.toggle('not-empty', totalItems > 0);
     }
-    
+
     function updateCart(sku, quantity) {
         if (quantity > 0) {
             cart[sku] = quantity;
@@ -408,9 +471,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateCartDisplay();
         syncQuantityDisplays();
-        updateCartCount(); // Ensure the cart count updates after modifying the cart
+        updateCartCount();
     }
-    
+
     function syncQuantityDisplays() {
         const cartItems = Object.entries(cart);
         const galleryCards = document.querySelectorAll('.card');

@@ -166,27 +166,33 @@ label {
 
 /* Quantity Controls */
 .quantity-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin-top: 10px;
+    display: flex; /* Use flexbox to arrange buttons and quantity display */
+    align-items: center; /* Center vertically */
+    justify-content: space-between; /* Space items evenly */
+    margin-top: 10px; /* Margin at the top */
 }
 
 .quantity-controls button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 12px 18px;
-    cursor: pointer;
-    margin: 0 5px;
-    transition: background-color 0.3s, transform 0.2s;
+    background-color: var(--primary-color); /* Primary button color */
+    color: white; /* Text color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 12px 18px; /* Padding for button size */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin: 0 5px; /* Margin between buttons */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
 }
 
 .quantity-controls button:hover {
-    background-color: var(--hover-dark);
-    transform: scale(1.05);
+    background-color: var(--hover-dark); /* Change color on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
+
+/* Ensure visibility based on quantity */
+.quantity-controls.hidden {
+    display: none; /* Hide controls if this class is added */
+}
+
 
 /* Search and Count Styles */
 #categorySelect,
@@ -443,4 +449,29 @@ label {
 
 .item-details div {
     margin: 2px 0;
+}
+
+.category-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Space between buttons */
+    justify-content: space-between; /* Distribute space between buttons */
+}
+
+.category-button {
+    padding: 10px 15px; /* Adjust padding for better button size */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f0f0f0; /* Button background */
+    flex: 1; /* Allow buttons to grow and fill the space */
+    max-width: calc(33.33% - 10px); /* Adjust based on how many buttons you want per row */
+}
+
+.category-button.selected {
+    background-color: #007bff; /* Selected button color */
+    color: white; /* Selected button text color */
+}
+#editButton {
+    display: none; /* Hide the edit button */
 }
