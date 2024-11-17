@@ -484,4 +484,39 @@ document.addEventListener('DOMContentLoaded', () => {
             card.querySelector('.quantity').textContent = quantity ? quantity[1] : '0';
         });
     }
+document.getElementById('checkoutButton').addEventListener('click', () => {
+    const cartData = Object.entries(cart).map(([sku, quantity]) => {
+        const item = items.find(item => item[indices['SKU']] === sku);
+        if (!item) return null;
+
+        return {
+            sku: sku,
+            quantity: quantity,
+            skuName: item[indices['SKUName']],
+            cost: parseFloat(item[indices['Cost']]) || 0,
+        };
+    }).filter(item => item !== null); // Filter out any null values
+
+    // Send cart data to Google Sheets
+    fetch('https://script.google.com/macros/s/AKfycbw4rCHfT0Nr5Kdyfce4I-ZpwQb8XWV1At9vFxhn5He9f0njevZ_Yc8QPNC1eKpA-7nM/exec', { // Replace with your script's URL
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cart: cartData })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.text();
+    })
+    .then(data => {
+        alert('Checkout successful! Your cart has been sent to Google Sheets.');
+    })
+    .catch(error => {
+        console.error('Error sending cart data:', error);
+        alert('There was an error during checkout: ' + error.message);
+    });
+});
 });
